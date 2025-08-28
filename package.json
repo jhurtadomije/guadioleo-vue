@@ -1,0 +1,57 @@
+{
+  "name": "guadioleo-vue",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Aplicación de escritorio para gestión de lotes y liquidaciones de Guadioleo",
+  "author": "Jose Ramón Hurtado Mje",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "build:web": "vite build",
+    "build:electron": "npm run build:web && electron-builder",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "firebase": "^12.1.0",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
+    "lucide-vue-next": "^0.542.0",
+    "vue": "^3.5.18",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "concurrently": "^9.2.1",
+    "electron": "^37.4.0",
+    "electron-builder": "^26.0.12",
+    "vite": "^7.1.2",
+    "wait-on": "^8.0.4"
+  },
+  "build": {
+    "appId": "com.guadioleo.app",
+    "productName": "Guadioleo",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/Guadioleo.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Guadioleo",
+      "uninstallDisplayName": "Guadioleo",
+      "installerIcon": "build/Guadioleo.ico",
+      "uninstallerIcon": "build/Guadioleo.ico",
+      "installerHeaderIcon": "build/Guadioleo.ico"
+    }
+  }
+}

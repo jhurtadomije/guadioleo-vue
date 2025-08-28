@@ -1,0 +1,174 @@
+/* src/assets/base.css */
+
+/* 🎨 Paleta */
+:root {
+  --color-olive-dark: #556B2F;
+  --color-olive: #6B8E23;
+  --color-gold: #DAA520;
+  --color-sunflower: #FFD700;
+  --color-biomass: #8B4513;
+  --color-bg: #FDFCF6;
+  --color-text: #2E2E2E;
+  --blanco: #FFFFFF;
+  --fuente: 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  background: linear-gradient(135deg, #fdfcf6, #ebf0de);
+  color: var(--color-text);
+}
+
+/* 📝 Títulos */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* === 📦 Sección principal === */
+.app-section {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: clamp(1rem, 4vw, 2rem);
+  margin: clamp(1rem, 4vw, 2rem) auto;
+  max-width: 900px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.app-section h2 {
+  text-align: center;
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  margin-bottom: 1.5rem;
+  color: var(--color-olive-dark);
+}
+
+/* === Formularios === */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  color: #444;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 0.6rem;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  transition: 0.2s;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--color-olive-dark);
+  box-shadow: 0 0 6px rgba(85, 107, 47, 0.4);
+  outline: none;
+}
+
+/* === Botones === */
+.boton {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  border: none;
+  text-align: center;
+}
+
+/* Estados */
+.boton:hover {
+  transform: translateY(-2px);
+}
+.boton:active {
+  transform: translateY(0);
+}
+
+/* Variantes */
+.boton.primario {
+  background: var(--color-olive-dark);
+  color: #fff;
+}
+.boton.primario:hover {
+  background: var(--color-gold);
+  color: var(--color-olive-dark);
+}
+
+.boton.exito {
+  background: #22c55e;
+  color: #fff;
+}
+
+.boton.peligro {
+  background: #ef4444;
+  color: #fff;
+}
+
+.boton.advertencia {
+  background: var(--color-gold);
+  color: var(--color-olive-dark);
+}
+
+/* === Botón volver === */
+.btn-volver {
+  background: var(--color-olive-dark);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.6rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-volver:hover {
+  background: var(--color-gold);
+  color: var(--color-olive-dark);
+  transform: scale(1.05);
+}
+
+/* === Errores === */
+#error, .error {
+  color: #ef4444;
+  font-weight: bold;
+  margin-top: 1rem;
+  text-align: center;
+}
+.form-group {
+  margin-bottom: 1.2rem; /* separa cada campo */
+}
+
+.form-group input,
+.form-group select {
+  margin-top: 0.3rem; /* pequeño aire entre label y campo */
+}
+
+/* Botones dentro de btn-group o acciones */
+.btn-group,
+.acciones {
+  gap: 1rem; /* más aire entre botones */
+}
+
+.boton,
+.btn-volver {
+  margin-top: 0.5rem;   /* aire respecto a lo de arriba */
+  padding: 0.9rem 1.2rem; /* botones un poco más cómodos */
+}
+/* 📱 Responsivo */
+@media (max-width: 480px) {
+  .boton, .btn-volver {
+    width: 100%;
+    font-size: 0.95rem;
+  }
+}
