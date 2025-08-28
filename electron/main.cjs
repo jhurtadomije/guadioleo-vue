@@ -11,14 +11,15 @@ function createWindow() {
     },
   });
 
-  if (process.env.VITE_DEV_SERVER_URL) {
-    // 🔹 En desarrollo: carga la URL del servidor de Vite
-    win.loadURL(process.env.VITE_DEV_SERVER_URL);
-    win.webContents.openDevTools(); 
-  } else {
-    // 🔹 En producción: carga el build generado
-    win.loadFile(path.join(__dirname, "../dist/index.html"));
-  }
+ if (process.env.VITE_DEV_SERVER_URL) {
+  // 🔹 En desarrollo: carga la URL del servidor de Vite
+  win.loadURL(process.env.VITE_DEV_SERVER_URL);
+  win.webContents.openDevTools();
+} else {
+  // 🔹 En producción: carga desde resources
+  win.loadFile(path.join(process.resourcesPath, "dist/index.html"));
+}
+
 }
 
 app.whenReady().then(() => {
