@@ -7,22 +7,44 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"), 
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
- if (process.env.VITE_DEV_SERVER_URL) {
-  // 🔹 En desarrollo: carga la URL del servidor de Vite
-  win.loadURL(process.env.VITE_DEV_SERVER_URL);
-  win.webContents.openDevTools();
-} else {
-  // 🔹 En producción: carga desde resources
-  win.loadFile(path.join(process.resourcesPath, "dist/index.html"));
-}
+  if (!app.isPackaged) {
+    // 🔹 En desarrollo
+    console.log("🌍 Modo desarrollo: cargando desde Vite: http://localhost:5173");
+    win.loadURL("http://localhost:5173");
+    win.webContents.openDevTools();
+  } else {
+    // 🔹 En producción
+    const indexPath = path.join(process.resourcesPath, "dist", "index.html");
 
+    console.log("📂 Modo producción: intentando cargar:", indexPath);
+
+    win.loadFile(indexPath).catch((err) => {
+      console.error("❌ Error cargando index.html:", err);
+
+      // Fallback: mostrar página de error
+      win.loadURL(
+        `data:text/html;charset=utf-8,
+        <html>
+          <head>
+            <title>Error</title>
+          </head>
+          <body>
+            <h1>⚠️ No se pudo cargar la aplicación</h1>
+            <p>Verifique que los archivos de <b>dist/</b> estén en resources.</p>
+            <pre>${err}</pre>
+          </body>
+        </html>`
+      );
+    });
+  }
 }
 
 app.whenReady().then(() => {
+  console.log("🚀 Electron iniciado");
   createWindow();
 
   app.on("activate", () => {
@@ -30,9 +52,7 @@ app.whenReady().then(() => {
   });
 });
 
-ipcMain.handle("ping", () => {
-  return "pong desde main!";
-})
+ipcMain.handle("ping", () => "pong desde main!");
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();

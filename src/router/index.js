@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, createWebHashHistory } from "vue-router";
 
 // Importamos las vistas
 import Welcome from "../views/Welcome.vue";
@@ -19,8 +19,11 @@ const routes = [
   { path: "/historico", name: "Historico", component: Historico, meta: { requiresAuth: true } },
 ];
 
+const isElectron = !!window.isElectron;
+
+
 const router = createRouter({
-  history: createWebHistory(),
+ history: isElectron ? createWebHashHistory() : createWebHistory(),
   routes,
 });
 

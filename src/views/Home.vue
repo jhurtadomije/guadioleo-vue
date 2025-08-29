@@ -3,6 +3,10 @@
     <header class="header">
       <img src="/imagenes/Guadioleo.png" alt="Logo" class="logo" />
       <h2>Seleccione una opción</h2>
+      <!-- 🔹 Mostrar rol -->
+      <p class="user-info">
+        Sesión iniciada como: <strong>{{ rol }}</strong>
+      </p>
     </header>
 
     <!-- Menú con router-link -->
@@ -39,11 +43,16 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue"
 import { useRouter } from 'vue-router'
 import { auth } from '../services/firebase'
 import { signOut } from 'firebase/auth'
 
 const router = useRouter()
+const rol = ref("")
+onMounted(() => {
+  rol.value = localStorage.getItem("rol") || "usuario"
+})
 
 const logout = async () => {
   await signOut(auth)
@@ -60,7 +69,6 @@ const logout = async () => {
   max-width: 70rem;
   margin: auto;
   padding: 2.5rem 1.5rem;
-  min-height: 100vh;
   background: linear-gradient(135deg, #fdfdfd, #f5f5f0);
 }
 
@@ -86,6 +94,12 @@ const logout = async () => {
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+.user-info {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #444;
 }
 
 /* === MENÚ PRINCIPAL === */

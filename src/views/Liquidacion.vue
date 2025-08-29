@@ -78,9 +78,9 @@
       <button class="boton advertencia" @click="calcularLiquidacion">📊 Calcular</button>
       <button class="boton exito" @click="guardarLiquidacion">💾 Guardar</button>
       <button class="boton primario" @click="exportarPDF">📄 Exportar PDF</button>
-      <router-link to="/home" class="btn-volver">← Volver</router-link>
+      
     </div>
-
+<router-link to="/home" class="btn-volver">← Volver</router-link>
 <!-- Modal de resultado -->
 <Modal v-if="mostrarModal" @cerrar="cerrarModal" :width="'42rem'">
   <h2>📊 Resumen de Liquidación</h2>
@@ -427,15 +427,22 @@ input[type="number"]{ -moz-appearance:textfield; }
 }
 
 /* armoniza el router-link de Volver con los botones */
-.btn-volver{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  height:44px;
-  padding:0 1.2rem;
-  border-radius:.6rem;
-  font-weight:600;
-  text-decoration:none;
+.btn-volver {
+  display: block;
+  width: 90%;
+  max-width: 16rem;
+  margin: 1rem auto;
+  text-align: center;
+  background: var(--color-olive-dark);
+  color: white;
+  padding: 0.7rem 1rem;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn-volver:hover {
+  opacity: 0.9;
 }
 
 /* hover coherente con tu base.css */
@@ -448,7 +455,10 @@ input[type="number"]{ -moz-appearance:textfield; }
 @media (max-width:480px){
   .form-grid{ grid-template-columns:1fr; }
   .btn-group{ flex-direction:column; }
-  .boton, .btn-volver{ min-width:unset; width:100%; }
+  .boton { 
+  min-width:unset; 
+  width:100%;
+   }
 }
 .modal-overlay {
   position: fixed;
