@@ -47,14 +47,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, onUnmounted } from "vue"
 import { db } from "../services/firebase"
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc } from "firebase/firestore"
-import jsPDF from "jspdf"
-import autoTable from "jspdf-autotable"
+import { jsPDF } from "jspdf"
 import { Trash2 } from "lucide-vue-next"
 
 const historico = ref([])
+const mostrarModal = ref(false)
+const detalleSeleccionado = ref(null)
 
 // 🔹 Formatear fecha desde Firestore Timestamp
 function formatearFecha(fecha) {
@@ -69,66 +70,166 @@ function formatearFecha(fecha) {
   })
 }
 
+let unsubscribe = null // referencia al listener
+
 onMounted(() => {
   const q = query(collection(db, "liquidacionesGuardadas"), orderBy("createdAt", "desc"))
-  onSnapshot(q, (snapshot) => {
-    historico.value = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data()
-    }))
-  })
+  unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      historico.value = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+    },
+    (error) => {
+      console.warn("❌ Error en listener:", error.message)
+    }
+  )
 })
 
-// 🔹 Generar PDF a partir del snapshot guardado
-function generarPDF(item) {
+onUnmounted(() => {
+  if (unsubscribe) {
+    unsubscribe()
+    unsubscribe = null
+  }
+})
+
+// 🔹 Generar PDF desde el HTML guardado
+import autoTable from "jspdf-autotable";
+import logo from "../assets/Guadioleo.png";
+
+async function generarPDF(item) {
   if (!item) {
-    alert("⚠️ No se encontró el detalle de esta liquidación")
-    return
+    alert("⚠️ No se encontró la liquidación");
+    return;
   }
 
-  const doc = new jsPDF()
+  const doc = new jsPDF();
 
-  doc.setFontSize(18)
-  doc.text("GUADIOLEO - LIQUIDACIÓN", 14, 20)
+  // === Logo ===
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const imgWidth = 25;
+  const imgHeight = 25;
+  const imgX = (pageWidth - imgWidth) / 2;
+  doc.addImage(logo, "PNG", imgX, 10, imgWidth, imgHeight);
 
-  doc.setFontSize(12)
-  doc.text(`Contrato: ${item.contrato}`, 14, 30)
-  doc.text(`Cliente: ${item.cliente}`, 14, 38)
-  doc.text(`Fecha: ${item.fecha}`, 14, 46)
-  doc.text(`Rol: ${item.rol}`, 14, 54)
+  // === Datos de empresa ===
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  const direccion = "Glorieta Fernando Quiñones, 0 · Edificio CENTRIS I, Oficina 1,98 · 41940, Tomares (Sevilla)";
+  doc.text(direccion, pageWidth / 2, 46, { align: "center" });
 
-  // Resumen principal
+  // === Título ===
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Informe Liquidación", pageWidth / 2, 60, { align: "center" });
+
+  let y = 65;
+
+  // --- Cabecera
   autoTable(doc, {
-    startY: 70,
-    head: [["Kilos recibidos", "Kilos finales", "Precio base", "Precio final", "Importe final"]],
+    startY: y,
+    head: [["Contrato", "Cliente", "Fecha", "Tipo"]],
+    body: [[item.contrato, item.cliente, item.fecha, item.tipo?.toUpperCase()]],
+  });
+
+  // --- Kg y precio
+  autoTable(doc, {
+    startY: doc.lastAutoTable.finalY + 10,
+    head: [["Kg recibidos", "Kg finales", "Precio base (€/kg)", "Precio final (€/kg)"]],
     body: [[
       item.kgRecibidos,
       item.kgFinal.toFixed(2),
-      item.precioBase.toFixed(4) + " €/kg",
-      item.precioFinal.toFixed(4) + " €/kg",
-      item.importeFinal.toFixed(2) + " €"
+      item.precioBase.toFixed(4),
+      item.precioFinal.toFixed(4),
     ]],
-    styles: { halign: "center" },
-    headStyles: { fillColor: [85, 107, 47] }
-  })
+  });
 
-  // Ajustes
-  if (item.ajustes && item.ajustes.length > 0) {
+  // --- Analítica (según tipo)
+  if (item.tipo === "orujo" && item.modo === "auto") {
     autoTable(doc, {
       startY: doc.lastAutoTable.finalY + 10,
-      head: [["Ajustes aplicados"]],
-      body: item.ajustes.map(a => [a]),
-      styles: { halign: "left" }
-    })
+      head: [["Cantidad", "Acidez", "H+I+E.E"]],
+      body: [[
+        item.kgRecibidos,
+        item.acidez,
+        item.hiActual.toFixed(2),
+      ], [
+        "Base", item.baseAcidez, item.baseTol
+      ], [
+        "Resultado", item.resAcidez.toFixed(2), item.resHI.toFixed(2)
+      ]],
+    });
+  } else {
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 10,
+      head: [["Cantidad", "Acidez", "H+I", "Ceras", "E+U"]],
+      body: [[
+        item.kgRecibidos,
+        item.acidez,
+        item.hiActual.toFixed(2),
+        item.ceras,
+        item.eritrodiol,
+      ], [
+        "Base",
+        item.baseAcidez,
+        item.baseTol,
+        item.baseCeras,
+        item.baseEritrodiol
+      ], [
+        "Resultado",
+        item.resAcidez.toFixed(2),
+        item.resHI.toFixed(2),
+        item.resCeras?.toFixed(2) ?? "-",
+        item.resEritrodiol?.toFixed(2) ?? "-"
+      ]],
+    });
   }
 
-  doc.save(`liquidacion_${item.contrato || "sin_contrato"}.pdf`)
+  // --- Descuentos
+  autoTable(doc, {
+    startY: doc.lastAutoTable.finalY + 10,
+    head: [["Tolerancia (kg)", "Acidez (€/kg)", "Ceras (€/kg)", "E+U (€/kg)", "Total €/kg"]],
+    body: [[
+      item.descKgTol.toFixed(2),
+      item.descAcidez.toFixed(6),
+      item.descCeras?.toFixed(6) ?? "-",
+      item.descEritrodiol?.toFixed(6) ?? "-",
+      item.descTotal.toFixed(6),
+    ]],
+  });
+
+  // --- Liquidación Final
+  autoTable(doc, {
+    startY: doc.lastAutoTable.finalY + 10,
+    head: [["Concepto", "Importe"]],
+    body: [
+      ["Importe", item.importeFinal.toFixed(2) + " €"],
+      [`IVA (${item.ivaPorcentaje}%)`, item.iva.toFixed(2) + " €"],
+      ["Total factura", item.totalFactura.toFixed(2) + " €"],
+      ["Entrega a cuenta", item.entregaCuenta.toFixed(2) + " €"],
+      ["Saldo a S/N favor", item.saldo.toFixed(2) + " €"],
+    ],
+    didParseCell: function (data) {
+      if (data.section === "body" && data.row.index === 4 && data.column.index === 1) {
+        if (item.saldo < 0) {
+          data.cell.styles.textColor = [200, 0, 0]; // rojo
+        } else {
+          data.cell.styles.textColor = [0, 150, 0]; // verde
+        }
+        data.cell.styles.fontStyle = "bold";
+      }
+    },
+  });
+
+  doc.save(`liquidacion_${item.contrato || "sin_contrato"}.pdf`);
 }
-const mostrarModal = ref(false)
-const detalleSeleccionado = ref(null)
+
+
 
 function verDetalle(item) {
-  detalleSeleccionado.value = item.resumen
+  detalleSeleccionado.value = item.htmlResumen || "No hay resumen guardado"
   mostrarModal.value = true
 }
 
@@ -136,6 +237,7 @@ function cerrarModal() {
   mostrarModal.value = false
   detalleSeleccionado.value = null
 }
+
 async function eliminarItem(id, coleccion) {
   if (!confirm("¿Seguro que deseas eliminar esta liquidación?")) return
   try {
@@ -146,8 +248,8 @@ async function eliminarItem(id, coleccion) {
     alert("Error eliminando la liquidación")
   }
 }
-
 </script>
+
 
 <style scoped>
 .historico-tabla {

@@ -5,7 +5,7 @@
 
     <!-- Aquí se renderizan las páginas -->
     <main class="main-content">
-      <router-view />
+      <router-view :key="$route.fullPath" />
     </main>
 
     <!-- Footer siempre visible -->

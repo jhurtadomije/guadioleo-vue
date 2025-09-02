@@ -42,9 +42,19 @@
     <Modal v-if="mostrarModal" @cerrar="mostrarModal=false">
       <h2>📊 Resumen de Composición</h2>
       <div v-html="resultadoHtml"></div>
-      <button class="boton exito" @click="guardarComposicion">💾 Guardar Composición</button>
+      <button class="boton exito" @click="abrirModalGuardar">💾 Guardar Composición</button>
+
     </Modal>
 
+<!-- Modal para título -->
+    <Modal v-if="mostrarGuardar" @cerrar="mostrarGuardar=false">
+      <h3>Guardar Lote</h3>
+      <input v-model="tituloLote" type="text" placeholder="Introduce un título" />
+      <div class="acciones">
+        <button class="boton exito" @click="guardarComposicion">✅ Guardar</button>
+        <button class="boton peligro" @click="mostrarGuardar=false">❌ Cancelar</button>
+      </div>
+    </Modal>
 
     <!-- 🔙 Botón Volver -->
     <button class="btn-volver" @click="$router.push('/home')">
@@ -63,6 +73,10 @@ const partidas = ref([]);
 const mostrarModal = ref(false);
 const resultadoHtml = ref("");
 
+// 🔹 refs para guardar con título
+const mostrarGuardar = ref(false);
+const tituloLote = ref("");
+
 function agregarPartida() {
   partidas.value.push({
     id: Date.now(),
@@ -72,7 +86,7 @@ function agregarPartida() {
     impurezas: 0,
     ceras: 0,
     eritrodiol: 0,
-    esteres: 0,   // 👈 añadimos esteres
+    esteres: 0,
     precio: 0,
     tipoAceite: "",
     procedencia: ""
@@ -107,7 +121,6 @@ function calcularComposicion() {
     medias.esteres += p.esteres * p.kilos;
     medias.precio += p.precio * p.kilos;
 
-    // 👇 detalle por partida
     detallePartidas += `
       <div class="detalle-partida">
         <h4>Partida ${idx + 1}</h4>
@@ -127,7 +140,6 @@ function calcularComposicion() {
     `;
   });
 
-  // ✅ medias ponderadas
   const resumen = `
     <h3>📊 Composición Final</h3>
     <p><strong>Total Kg:</strong> ${totalKg.toFixed(2)} kg</p>
@@ -148,6 +160,11 @@ function calcularComposicion() {
 
 const rolUsuario = localStorage.getItem("rol") || "Usuario";
 
+function abrirModalGuardar() {
+  mostrarGuardar.value = true;
+  tituloLote.value = "";
+}
+
 async function guardarComposicion() {
   try {
     const user = auth.currentUser;
@@ -156,34 +173,31 @@ async function guardarComposicion() {
       return;
     }
 
-    const titulo = prompt("Introduce un título para este lote:", "Diseño personalizado");
-
-    // totales
     const totalKg = partidas.value.reduce((sum, p) => sum + p.kilos, 0);
     const totalPrecio = partidas.value.reduce((sum, p) => sum + (p.precio * p.kilos), 0);
     const precioMedio = totalKg > 0 ? (totalPrecio / totalKg) : 0;
 
     await addDoc(collection(db, "lotesGuardados"), {
-      partidas: partidas.value,       // 👈 array con todas las partidas
-      resumen: resultadoHtml.value,   // 👈 HTML del resumen
-      titulo: titulo || "Lote sin título",
-      rol: rolUsuario,           // ⚡ aquí metes el rol real del usuario
+      partidas: partidas.value,
+      resumen: resultadoHtml.value,
+      titulo: tituloLote.value || "Lote sin título",
+      rol: rolUsuario,
       uid: user.uid,
-      kg: totalKg,                    // ✅ totales calculados
+      kg: totalKg,
       precio: precioMedio,
       fecha: serverTimestamp()
     });
 
     alert("✅ Lote completo guardado en la base de datos");
+    mostrarGuardar.value = false;
     mostrarModal.value = false;
   } catch (e) {
     console.error("Error al guardar:", e);
     alert("❌ Error al guardar el lote");
   }
 }
-
-
 </script>
+
 
 
 <style scoped>

@@ -52,7 +52,7 @@
 
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { db } from "../services/firebase";
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 import Modal from "../components/Modal.vue";
@@ -63,15 +63,31 @@ const mostrarModal = ref(false);
 const loteSeleccionado = ref(null);
 import { Trash2 } from "lucide-vue-next"
 
+let unsubscribe = null
+
 onMounted(() => {
-  const q = query(collection(db, "lotesGuardados"), orderBy("fecha", "desc"));
-  onSnapshot(q, (snapshot) => {
-    lotes.value = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-  });
-});
+  const q = query(collection(db, "lotesGuardados"), orderBy("fecha", "desc"))
+  unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      lotes.value = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+    },
+    (error) => {
+      console.warn("❌ Error en listener:", error.message)
+    }
+  )
+})
+onUnmounted(() => {
+  if (unsubscribe) {
+    unsubscribe()
+    unsubscribe = null
+  }
+})
+
+
 function exportarPDF(lote) {
   if (!lote) {
     alert("⚠️ No se encontró el detalle de este lote");
@@ -82,7 +98,7 @@ function exportarPDF(lote) {
 
   // Título
   doc.setFontSize(18);
-  doc.text("GUADIOLEO - LOTE", 14, 20);
+  doc.text("Comercial Oleica - LOTE", 14, 20);
 
   // Cabecera
   doc.setFontSize(12);

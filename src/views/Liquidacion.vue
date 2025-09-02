@@ -78,7 +78,7 @@
     <!-- Botones -->
     <div class="btn-group">
       <button class="boton advertencia" @click="calcularLiquidacion">📊 Calcular</button>
-      <button class="boton exito" @click="guardarLiquidacion">💾 Guardar</button>
+      
       <button class="boton primario" @click="exportarPDF">📄 Exportar PDF</button>
       
     </div>
@@ -87,129 +87,135 @@
 
 <!-- Modal de resultado -->
 <Modal v-if="mostrarModal" @cerrar="cerrarModal" :width="'55rem'">
-  <h2>📊 Resumen de Liquidación</h2>
+  <div id="resumen-liquidacion">
+    <h2>📊 Resumen de Liquidación</h2>
 
-  <!-- CABECERA -->
-  <table class="resumen-table">
-    <tr>
-      <th>Boletín</th><td>{{ contrato }}</td>
-      <th>Empresa</th><td>{{ cliente }}</td>
-    </tr>
-    <tr>
-      <th>Fecha</th><td>{{ fecha }}</td>
-      <th>Tipo</th><td>{{ tipoAceite.toUpperCase() }}</td>
-    </tr>
-    <tr>
-      <th colspan="2">Precio Base</th>
-      <td colspan="2">{{ precioBase.toFixed(4) }} €/kg</td>
-    </tr>
-  </table>
+    <!-- CABECERA -->
+    <table class="resumen-table">
+      <tr>
+        <th>Boletín</th><td>{{ contrato }}</td>
+        <th>Empresa</th><td>{{ cliente }}</td>
+      </tr>
+      <tr>
+        <th>Fecha</th><td>{{ fecha }}</td>
+        <th>Tipo</th><td>{{ tipoAceite.toUpperCase() }}</td>
+      </tr>
+      <tr>
+        <th colspan="2">Precio Base</th>
+        <td colspan="2">{{ precioBase.toFixed(4) }} €/kg</td>
+      </tr>
+    </table>
 
-  <!-- VALORES INICIALES -->
-  <h3>Analítica</h3>
-  <table class="resumen-table">
-    <thead>
-      <tr>
-        <th>Cantidad</th>
-        <th>Acidez</th>
-        <th>{{ tipoAceite === 'orujo' ? 'H+I+E.E' : 'H+I' }}</th>
-        <th v-if="resumenDatos.baseCeras !== null">Ceras</th>
-        <th v-if="resumenDatos.baseEritrodiol !== null">E+U</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>{{ resumenDatos.kgRecibidos }}</td>
-        <td>{{ acidez }}</td>
-        <td>{{ resumenDatos.hiActual.toFixed(2) }}</td>
-        <td v-if="resumenDatos.baseCeras !== null">{{ ceras }}</td>
-        <td v-if="resumenDatos.baseEritrodiol !== null">{{ eritrodiol }}</td>
-      </tr>
-    </tbody>
-  </table>
+    <!-- VALORES INICIALES -->
+    <h3>Analítica</h3>
+    <table class="resumen-table">
+      <thead>
+        <tr>
+          <th>Cantidad</th>
+          <th>Acidez</th>
+          <th>{{ tipoAceite === 'orujo' ? 'H+I+E.E' : 'H+I' }}</th>
+          <th v-if="resumenDatos.baseCeras !== null">Ceras</th>
+          <th v-if="resumenDatos.baseEritrodiol !== null">E+U</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ resumenDatos.kgRecibidos }}</td>
+          <td>{{ acidez }}</td>
+          <td>{{ resumenDatos.hiActual.toFixed(2) }}</td>
+          <td v-if="resumenDatos.baseCeras !== null">{{ ceras }}</td>
+          <td v-if="resumenDatos.baseEritrodiol !== null">{{ eritrodiol }}</td>
+        </tr>
+      </tbody>
+    </table>
 
-  <!-- REVERSIÓN Y EXCESOS -->
-  <h3>Reversión y Excesos</h3>
-  <table class="resumen-table">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Acidez</th>
-        <th>{{ tipoAceite === 'orujo' ? 'H+I+E.E' : 'H+I' }}</th>
-        <th v-if="resumenDatos.baseCeras !== null">Ceras</th>
-        <th v-if="resumenDatos.baseEritrodiol !== null">E+U</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Bases y Tolerancias</td>
-        <td>{{ resumenDatos.baseAcidez }}</td>
-        <td>{{ resumenDatos.baseTol }}</td>
-        <td v-if="resumenDatos.baseCeras !== null">{{ resumenDatos.baseCeras }}</td>
-        <td v-if="resumenDatos.baseEritrodiol !== null">{{ resumenDatos.baseEritrodiol }}</td>
-      </tr>
-      <tr>
-        <td>Excesos</td>
-        <td>{{ resumenDatos.resAcidez.toFixed(2) }}</td>
-        <td>{{ resumenDatos.resHI.toFixed(2) }}</td>
-        <td v-if="resumenDatos.baseCeras !== null">{{ resumenDatos.resCeras.toFixed(2) }}</td>
-        <td v-if="resumenDatos.baseEritrodiol !== null">{{ resumenDatos.resEritrodiol.toFixed(2) }}</td>
-      </tr>
-    </tbody>
-  </table>
+    <!-- REVERSIÓN Y EXCESOS -->
+    <h3>Reversión y Excesos</h3>
+    <table class="resumen-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Acidez</th>
+          <th>{{ tipoAceite === 'orujo' ? 'H+I+E.E' : 'H+I' }}</th>
+          <th v-if="resumenDatos.baseCeras !== null">Ceras</th>
+          <th v-if="resumenDatos.baseEritrodiol !== null">E+U</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bases y Tolerancias</td>
+          <td>{{ resumenDatos.baseAcidez }}</td>
+          <td>{{ resumenDatos.baseTol }}</td>
+          <td v-if="resumenDatos.baseCeras !== null">{{ resumenDatos.baseCeras }}</td>
+          <td v-if="resumenDatos.baseEritrodiol !== null">{{ resumenDatos.baseEritrodiol }}</td>
+        </tr>
+        <tr>
+          <td>Excesos</td>
+          <td>{{ resumenDatos.resAcidez.toFixed(2) }}</td>
+          <td>{{ resumenDatos.resHI.toFixed(2) }}</td>
+          <td v-if="resumenDatos.baseCeras !== null">{{ resumenDatos.resCeras.toFixed(2) }}</td>
+          <td v-if="resumenDatos.baseEritrodiol !== null">{{ resumenDatos.resEritrodiol.toFixed(2) }}</td>
+        </tr>
+      </tbody>
+    </table>
 
-  <!-- DESCUENTOS €/kg -->
-  <h3>Descuentos en Precio</h3>
-  <table class="resumen-table">
-    <thead>
-      <tr>
-        <th>Acidez (€/kg)</th>
-        <th v-if="resumenDatos.descCeras !== null">Ceras (€/kg)</th>
-        <th v-if="resumenDatos.descEritrodiol !== null">E+U (€/kg)</th>
-        <th>Total (€/kg)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>{{ resumenDatos.descAcidez.toFixed(6) }}</td>
-        <td v-if="resumenDatos.descCeras !== null">{{ resumenDatos.descCeras.toFixed(6) }}</td>
-        <td v-if="resumenDatos.descEritrodiol !== null">{{ resumenDatos.descEritrodiol.toFixed(6) }}</td>
-        <td>{{ resumenDatos.descTotal.toFixed(6) }}</td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <th>Precio Base</th>
-        <td colspan="2">{{ resumenDatos.precioBase.toFixed(4) }} €/kg</td>
-        <th>Precio Final</th>
-        <td>{{ resumenDatos.precioFinal.toFixed(4) }} €/kg</td>
-      </tr>
-    </tfoot>
-  </table>
+    <!-- DESCUENTOS €/kg -->
+    <h3>Descuentos en Precio</h3>
+    <table class="resumen-table">
+      <thead>
+        <tr>
+          <th>Acidez (€/kg)</th>
+          <th v-if="resumenDatos.descCeras !== null">Ceras (€/kg)</th>
+          <th v-if="resumenDatos.descEritrodiol !== null">E+U (€/kg)</th>
+          <th>Total (€/kg)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ resumenDatos.descAcidez.toFixed(6) }}</td>
+          <td v-if="resumenDatos.descCeras !== null">{{ resumenDatos.descCeras.toFixed(6) }}</td>
+          <td v-if="resumenDatos.descEritrodiol !== null">{{ resumenDatos.descEritrodiol.toFixed(6) }}</td>
+          <td>{{ resumenDatos.descTotal.toFixed(6) }}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th>Precio Base</th>
+          <td colspan="2">{{ resumenDatos.precioBase.toFixed(4) }} €/kg</td>
+          <th>Precio Final</th>
+          <td>{{ resumenDatos.precioFinal.toFixed(4) }} €/kg</td>
+        </tr>
+      </tfoot>
+    </table>
 
-  <!-- DESCUENTOS EN KILOS -->
-  <h3>Descuento en Kilos</h3>
-  <table class="resumen-table">
-    <tr><th>H+I</th><td>{{ resumenDatos.resHI.toFixed(2) }} %</td></tr>
-    <tr><th>Cantidad inicial</th><td>{{ resumenDatos.kgRecibidos }}</td></tr>
-    <tr><th>Descuento aplicado</th><td>{{ resumenDatos.descKgTol.toFixed(2) }}</td></tr>
-    <tr><th>Total Kilos</th><td><b>{{ resumenDatos.kgFinal.toFixed(2) }}</b></td></tr>
-  </table>
+    <!-- DESCUENTOS EN KILOS -->
+    <h3>Descuento en Kilos</h3>
+    <table class="resumen-table">
+      <tr><th>H+I</th><td>{{ resumenDatos.resHI.toFixed(2) }} %</td></tr>
+      <tr><th>Cantidad inicial</th><td>{{ resumenDatos.kgRecibidos }}</td></tr>
+      <tr><th>Descuento aplicado</th><td>{{ resumenDatos.descKgTol.toFixed(2) }}</td></tr>
+      <tr><th>Total Kilos</th><td><b>{{ resumenDatos.kgFinal.toFixed(2) }}</b></td></tr>
+    </table>
 
-  <!-- LIQUIDACIÓN FINAL -->
-  <h3>Liquidación Final</h3>
-  <table class="resumen-table">
-    <tr><th>Importe</th><td>{{ resumenDatos.importeFinal.toFixed(2) }} €</td></tr>
-    <tr><th>IVA ({{ resumenDatos.ivaPorcentaje }})</th><td>{{ resumenDatos.iva.toFixed(2) }} €</td></tr>
-    <tr><th>Total factura</th><td>{{ resumenDatos.totalFactura.toFixed(2) }} €</td></tr>
-    <tr><th>Entrega a cuenta</th><td>{{ resumenDatos.entregaCuenta.toFixed(2) }} €</td></tr>
-    <tr>
-      <th>Saldo a favor / en contra</th>
-      <td :style="{color: resumenDatos.saldo < 0 ? 'red' : 'green', fontWeight: 'bold'}">
-        {{ resumenDatos.saldo.toFixed(2) }} €
-      </td>
-    </tr>
-  </table>
+    <!-- LIQUIDACIÓN FINAL -->
+    <h3>Liquidación Final</h3>
+    <table class="resumen-table">
+      <tr><th>Importe</th><td>{{ resumenDatos.importeFinal.toFixed(2) }} €</td></tr>
+      <tr><th>IVA ({{ resumenDatos.ivaPorcentaje }})</th><td>{{ resumenDatos.iva.toFixed(2) }} €</td></tr>
+      <tr><th>Total factura</th><td>{{ resumenDatos.totalFactura.toFixed(2) }} €</td></tr>
+      <tr><th>Entrega a cuenta</th><td>{{ resumenDatos.entregaCuenta.toFixed(2) }} €</td></tr>
+      <tr>
+        <th>Saldo a favor / en contra</th>
+        <td :style="{color: resumenDatos.saldo < 0 ? 'red' : 'green', fontWeight: 'bold'}">
+          {{ resumenDatos.saldo.toFixed(2) }} €
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div style="margin-top:1rem; text-align:right;">
+  <button class="boton exito" @click.stop="guardarLiquidacion">💾 Guardar</button>
+</div>
+
 </Modal>
 
 
@@ -440,16 +446,55 @@ async function guardarLiquidacion() {
   try {
     const user = auth.currentUser;
     if (!user) return alert("Debes iniciar sesión");
+
+    if (!resumenDatos.value) {
+      return alert("⚠️ Primero calcula la liquidación antes de guardarla");
+    }
+
+    // ✅ Generamos el HTML desde resumenDatos
+    const htmlResumen = `
+      <h2>📊 Resumen de Liquidación</h2>
+      <table class="resumen-table">
+        <tr><th>Boletín</th><td>${resumenDatos.value.contrato}</td>
+            <th>Empresa</th><td>${resumenDatos.value.cliente}</td></tr>
+        <tr><th>Fecha</th><td>${resumenDatos.value.fecha}</td>
+            <th>Tipo</th><td>${resumenDatos.value.tipo.toUpperCase()}</td></tr>
+        <tr><th colspan="2">Precio Base</th>
+            <td colspan="2">${resumenDatos.value.precioBase.toFixed(4)} €/kg</td></tr>
+      </table>
+
+      <h3>Liquidación Final</h3>
+      <table class="resumen-table">
+        <tr><th>Kg recibidos</th><td>${resumenDatos.value.kgRecibidos}</td></tr>
+        <tr><th>Kg finales</th><td>${resumenDatos.value.kgFinal.toFixed(2)}</td></tr>
+        <tr><th>Precio final</th><td>${resumenDatos.value.precioFinal.toFixed(4)} €/kg</td></tr>
+        <tr><th>Importe</th><td>${resumenDatos.value.importeFinal.toFixed(2)} €</td></tr>
+        <tr><th>IVA</th><td>${resumenDatos.value.iva.toFixed(2)} €</td></tr>
+        <tr><th>Total factura</th><td>${resumenDatos.value.totalFactura.toFixed(2)} €</td></tr>
+        <tr><th>Entrega a cuenta</th><td>${resumenDatos.value.entregaCuenta.toFixed(2)} €</td></tr>
+        <tr><th>Saldo</th>
+            <td style="color:${resumenDatos.value.saldo < 0 ? 'red' : 'green'};font-weight:bold;">
+              ${resumenDatos.value.saldo.toFixed(2)} €
+            </td></tr>
+      </table>
+    `;
+
+    // Guardamos en Firestore
     await addDoc(collection(db, "liquidacionesGuardadas"), {
       ...resumenDatos.value,
-      resumen: resultado.value,
+      htmlResumen,   // 👈 siempre habrá un resumen
       rol: rolUsuario,
       uid: user.uid,
       createdAt: serverTimestamp(),
     });
-    alert("✅ Liquidación guardada en Firestore");
-  } catch (e) { console.error("❌ Error guardando:", e); }
+
+    alert("✅ Liquidación guardada en la base de datos");
+  } catch (e) {
+    console.error("❌ Error guardando:", e);
+    alert("Error guardando la liquidación");
+  }
 }
+
 
 // --- PDF ---
 function exportarPDF() {
@@ -470,7 +515,7 @@ function exportarPDF() {
 // === Datos de la empresa centrados ===
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  const direccion = "Glorieta Fernando Quiñones, 0 · Edificio Centris I, Oficina 1, 98-41940 Tomares (Sevilla)";
+  const direccion = "Glorieta Fernando Quiñones, 0 · Edificio CENTRIS I, Oficina 1,98 · 41940, Tomares (Sevilla)";
   doc.text(direccion, pageWidth / 2, 46, { align: "center" });
 
   // === Título debajo ===
